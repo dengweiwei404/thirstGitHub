@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IUserDao接口方法提供sql语句配置 -->
+<mapper namespace="com.ten.demo.Dao.StudentDao">
+
+<select id="selectone" resultType="com.ten.demo.pojo.Student" parameterType="String">
+    select * from student where id=#{id}
+</select>
+
+    <select id="selectAll" resultType="com.ten.demo.pojo.Student">
+        select * from student
+    </select>
+
+    <insert id="insertTo" parameterType="com.ten.demo.pojo.Student">
+        insert into student(id,name,sex,age) values(#{id},#{name},#{sex},#{age})
+    </insert>
+
+    <update id="updatefromone" parameterType="com.ten.demo.pojo.Student">
+        update student set name=#{name},sex=#{sex},age=#{age} where id=#{id}
+    </update>
+
+
+    <delete id="deleteone" parameterType="String">
+        delete from student where id=#{id}
+    </delete>
+
+
+</mapper>

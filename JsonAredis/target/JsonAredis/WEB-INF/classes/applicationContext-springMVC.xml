@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!-- 自动扫描controller -->
+    <context:component-scan base-package="com.jsonAndRedis.controller"/>
+
+    <!-- 告知Spring，我们启用注解驱动 -->
+    <mvc:annotation-driven>
+        <!-- 设置默认的消息转换器 -->
+        <mvc:message-converters register-defaults="true">
+            <!-- 设置StringHttpMessageConverter的编码为UTF-8 -->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8" />
+            </bean>
+            <!-- 避免ie浏览器返回json出现下载文件 -->
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="supportedMediaTypes" value="text/html;charset=UTF-8"></property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!-- 配置Spring MVC的视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 有时我们需要访问JSP页面,可理解为在控制器controller的返回值加前缀和后缀,变成一个可用的URL地址 -->
+        <!--<property name="prefix" value="/WEB-INF/views/**/"/>-->
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 对静态资源文件的访问,因为Spring MVC会拦截所有请求,导致jsp页面中对js和CSS的引用也被拦截,配置后可以把对资源的请求交给项目的
+    默认拦截器而不是Spring MVC-->
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/css/**" location="/css/"/>
+
+    <!-- 处理所有静态内容 -->
+    <mvc:default-servlet-handler/>
+
+    <!-- 文件上传 -->
+    <!--<bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!– 编码格式 –>
+        <property name="defaultEncoding" value="UTF-8" />
+        <!– 最大文件50M –>
+        <property name="maxUploadSize" value="52428800" />
+    </bean>-->
+</beans>

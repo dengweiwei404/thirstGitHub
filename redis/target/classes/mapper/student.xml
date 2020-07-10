@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ming.ssm.mapper.StudentDao"><!--namespace:定义一个操作包  --><!-- 是为在后面找到找到相应的语句 -->
+
+
+
+    <select id="selectone" resultType="com.ming.ssm.pojo.Student" parameterType="String">
+        select * from student where id=#{id}
+    </select>
+
+
+    <select id="selectAll" resultType="com.ming.ssm.pojo.Student">
+        select * from student
+    </select>
+
+
+
+
+
+</mapper>

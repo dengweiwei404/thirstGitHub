@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <!-- 引入配置文件 -->
+    <context:property-placeholder location="classpath:application.properties"/>
+
+    <context:component-scan base-package="com.jsonAndRedis.service"/>
+
+    <!-- 数据源配置 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${jdbc.driver}" />
+        <property name="jdbcUrl" value="${jdbc.url}" />
+        <property name="user" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+    <!-- 配置数据源,加载配置,也就是dataSource -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <!--mybatis的配置文件-->
+        <property name="configLocation" value="classpath:SqlMapConfig.xml" />
+        <!--扫描 XXXmapper.xml映射文件,配置扫描的路径-->
+        <property name="mapperLocations" value="classpath:mapperxml/*.xml"></property>
+    </bean>
+    <!-- Dao接口所在包名,spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.jsonAndRedis.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--开启事务注解扫描-->
+    <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+
+
+    <!-- jedis的配置-->
+
+    <!-- 设置Jedis连接池-->
+
+    <cache:annotation-driven cache-manager="cacheManager"/><!--开启缓存注解 -->
+
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}"/>
+        <property name="maxTotal" value="${redis.maxTotal}"/>
+        <property name="maxWaitMillis" value="${redis.maxWait}"/>
+        <property name="testOnBorrow" value="${redis.testOnBorrow}"/>
+        <property name="testOnReturn" value="${redis.testOnReturn}"/>
+    </bean>
+
+
+    <!--设置Redis连接属性 -->
+    <bean id="connection" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="password" value="${redis.password}"/>
+        <property name="poolConfig" ref="poolConfig"/>
+        <property name="timeout" value="10000"/>
+    </bean>
+
+
+    <!--设置对应的redisTemplate-->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+    <property name="connectionFactory" ref="connection"/>
+    <!--key进行序列化配置，默认JDK改为String -->
+    <property name="keySerializer">
+        <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+    </property>
+    <property name="valueSerializer">
+        <bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>
+    </property>
+    <property name="hashKeySerializer">
+        <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+    </property>
+    <property name="hashValueSerializer">
+        <bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>
+    </property>
+    </bean>
+
+
+    <!--配置缓存控制器,操作对象为redisTemplate -->
+    <bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+        <constructor-arg ref="redisTemplate"/>
+    </bean>
+
+
+</beans>

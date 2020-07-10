@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+    <!-- 加载访问mysql和redis数据库的属性文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+                <value>classpath:jedis.properties</value>
+            </list>
+        </property>
+    </bean>
+    <!-- 配置dbcp数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"></property>
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!-- 配置Session工厂 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 引入数据源 -->
+        <property name="dataSource" ref="dataSource" />
+        <!-- 引入mybatis的映射配置文件 -->
+        <property name="configLocation" value="classpath:SqlMapConfig.xml" />
+        <!-- 采用自动包扫描的方式来引入实体类 -->
+        <property name="typeAliasesPackage" value="com.ming.ssm.pojo" />
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+    </bean>
+    <!-- 采用自动包扫描的方式来注册Mapper -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <property name="basePackage" value="com.ming.ssm.mapper" />
+    </bean>
+</beans>
+
